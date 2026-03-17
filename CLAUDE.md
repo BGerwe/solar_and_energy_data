@@ -11,16 +11,36 @@ conda activate solar_api_data
 jupyter lab  # launch notebooks
 ```
 
-Key pip packages (not in conda defaults): `enphase-api`, `srpenergy`, `python-dotenv`, `pyjwt`
+Key pip packages (not in conda defaults): `enphase-api`, `srpenergy`, `python-dotenv`, `pyjwt`, `psycopg2-binary`, `fastapi`, `uvicorn`
 
 ## Project Structure
 
-This is a Jupyter notebook prototyping project for retrieving and visualizing solar and energy data from two sources:
+Solar and energy data retrieval, storage, and API serving from two sources (Enphase IQ Gateway, SRP utility).
 
+### Notebooks (prototyping)
 - **`prototyping_enphase.ipynb`** — Enphase IQ Gateway integration: cloud authentication, local gateway API calls, and a real-time matplotlib animation of power production/consumption data.
 - **`prototyping_srp.ipynb`** — SRP (Salt River Project) utility API integration for fetching electricity usage data.
-- **`token_retrieval.py`** — Standalone script to fetch a JWT token from Enphase cloud using username/password + gateway serial number.
-- **`configuration/gateway.cer`** — TLS certificate downloaded from the local IQ Gateway (used for secure local HTTPS calls).
+
+### Data collection
+- **`collect_enphase.py`** — Scheduled script (every 30 min) that polls the gateway and inserts a row into PostgreSQL.
+- **`token_manager.py`** — JWT token caching and auto-refresh. Cached token stored at `configuration/token.json`.
+
+### API server
+- **`api/server.py`** — FastAPI app with endpoints for current power, today's production, yesterday's production, and SRP consumption (stub).
+- Run: `uvicorn api.server:app --host 0.0.0.0 --port 8000`
+- Docs: `http://<host>:8000/docs`
+
+### Database
+- **`db/init.sql`** — PostgreSQL schema (`solar_data` database, `solar_production` table).
+- Run once: `psql -U <user> -f db/init.sql`
+
+### Deployment
+- **`systemd/solar-api.service`** — systemd unit file for the API server (Pi deployment).
+- **`systemd/README.txt`** — Setup instructions for systemd + cron (Pi) or Task Scheduler (Windows).
+
+### Other
+- **`token_retrieval.py`** — Original standalone script for Enphase JWT token fetching (superseded by `token_manager.py`).
+- **`configuration/gateway.cer`** — TLS certificate downloaded from the local IQ Gateway.
 
 ## Credentials
 
@@ -30,9 +50,9 @@ Credentials are loaded from `local.env` (untracked by git) via `python-dotenv`:
 ENPHASE_USERNAME=...
 ENPHASE_PASSWORD=...
 IQ_GATEWAY_SERIAL_NUMBER=...
+IQ_GATEWAY_HOST=https://envoy.local   # optional, defaults to https://envoy.local
+DATABASE_URL=postgresql://user:password@localhost:5432/solar_data
 ```
-
-The IQ Gateway host is the local LAN IP (e.g., `https://192.168.0.34`) or `envoy.local`.
 
 **Never commit `local.env` or any file containing credentials.**
 

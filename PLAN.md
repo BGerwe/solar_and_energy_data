@@ -147,6 +147,24 @@ solar_and_energy_data/
 
 ---
 
+## 7. Restructure DB to use migrations
+
+Replace the single `db/init.sql` with numbered migration files:
+
+```
+db/
+├── 001_create_solar_production.sql
+├── 002_create_devices.sql
+└── ...
+```
+
+- `init.sql` remains as a from-scratch reference but is not used against a live database
+- Each migration contains one incremental change and is run exactly once
+- New schema changes go in the next numbered file
+- No migration framework needed at this scale — just numbered SQL files with a naming convention
+
+---
+
 ## Out of Scope
 - SRP collection script and the `/energy/yesterday` endpoint implementation
 - Authentication/rate limiting on the API (LAN-only, trusted network)
