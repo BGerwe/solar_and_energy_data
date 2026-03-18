@@ -1,0 +1,1 @@
+ALTER TABLE devices ALTER COLUMN serialnum TYPE BIGINT;
