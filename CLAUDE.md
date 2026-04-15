@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Setup
+
+See `SETUP.md` for full setup instructions on a new Windows machine, or run `setup.ps1` for automated setup.
+
 ## Environment
 
 Conda environment name: `solar_api_data` (Python 3.14)
