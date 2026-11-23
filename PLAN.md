@@ -18,7 +18,7 @@ SRP collection script is **out of scope** for this plan.
 CREATE TABLE solar_production (
     id SERIAL PRIMARY KEY,
     recorded_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    watts_now REAL,              -- current production (wNow from inverters)
+    watts_now REAL,              -- current production (pcu wattsNow from /ivp/pdm/energy)
     watts_now_meter REAL,        -- current production from EIM meter
     wh_today REAL,               -- watt-hours produced today
     wh_last_seven_days REAL,     -- watt-hours last 7 days

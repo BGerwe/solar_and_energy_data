@@ -44,26 +44,32 @@ def collect():
         print("Failed to log in to the gateway.", file=sys.stderr)
         sys.exit(1)
 
-    # Fetch production data.
+    # Fetch energy totals from the micro-inverters (PCU). The EIM whToday /
+    # whLastSevenDays / whLifetime fields in /production.json are unreliable
+    # (all three report the same lifetime value), so use /ivp/pdm/energy instead.
+    energy = gw.api_call("/ivp/pdm/energy")
+    pcu = energy["production"]["pcu"]
+
+    watts_now = pcu.get("wattsNow")
+    wh_today = pcu.get("wattHoursToday")
+    wh_seven = pcu.get("wattHoursSevenDays")
+    wh_lifetime = pcu.get("wattHoursLifetime")
+
+    # Fetch inverter count and EIM meter power from /production.json.
     data = gw.api_call("/production.json")
 
-    # Parse inverter stats.
     inverters = next(
         p for p in data["production"] if p["type"] == "inverters"
     )
 
-    # Parse EIM meter stats (may not be present on non-metered gateways).
+    # EIM meter stats (may not be present on non-metered gateways).
     eim = next(
         (p for p in data["production"] if p["type"] == "eim"),
         None,
     )
 
-    watts_now = inverters.get("wNow")
     active_count = inverters.get("activeCount")
     watts_now_meter = eim["wNow"] if eim and eim.get("activeCount", 0) > 0 else None
-    wh_today = eim.get("whToday") if eim else None
-    wh_seven = eim.get("whLastSevenDays") if eim else None
-    wh_lifetime = eim.get("whLifetime") if eim else None
 
     # Fetch per-inverter data.
     inverter_data = gw.api_call("/api/v1/production/inverters")
