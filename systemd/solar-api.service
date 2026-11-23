@@ -1,0 +1,14 @@
+[Unit]
+Description=Solar Production FastAPI Server
+After=network.target postgresql.service
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/solar_and_energy_data
+ExecStart=/home/pi/miniconda3/envs/solar_api_data/bin/uvicorn api.server:app --host 0.0.0.0 --port 8000
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
