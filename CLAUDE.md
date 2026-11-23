@@ -35,8 +35,10 @@ Solar and energy data retrieval, storage, and API serving from two sources (Enph
 - Docs: `http://<host>:8000/docs`
 
 ### Database
-- **`db/init.sql`** — PostgreSQL schema (`solar_data` database, `solar_production` table).
-- Run once: `psql -U <user> -f db/init.sql`
+- **`db/NNN_*.sql`** — numbered migrations; the single source of truth for the schema. Never edit an applied one; add a new number.
+- **`db/migrate.py`** — applies pending migrations and records them in `schema_migrations`. `--status` lists them; `--baseline NNN` marks existing ones as applied without running them.
+- **`db/init.sql`** — only creates the empty `solar_data` database. Fresh install: `psql -U <user> -f db/init.sql` then `python db/migrate.py`.
+- **`db/cleanup_duplicates.sql`** — one-off maintenance script (not a migration; ignored by `migrate.py`).
 
 ### Deployment
 - **`systemd/solar-api.service`** — systemd unit file for the API server (Pi deployment).

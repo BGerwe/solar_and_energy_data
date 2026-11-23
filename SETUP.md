@@ -51,23 +51,23 @@ Where to find these values:
 Open a terminal and run:
 
 ```bash
-# Create the database
-psql -U postgres -c "CREATE DATABASE solar_data;"
+# Create the empty database
+psql -U postgres -f db/init.sql
 
-# Run all migrations in order
-psql -U postgres -d solar_data -f db/001_create_solar_production.sql
-psql -U postgres -d solar_data -f db/002_create_devices.sql
-psql -U postgres -d solar_data -f db/003_create_inverter_readings.sql
-psql -U postgres -d solar_data -f db/004_alter_devices_serialnum_bigint.sql
-psql -U postgres -d solar_data -f db/005_seed_devices.sql
-psql -U postgres -d solar_data -f db/006_add_inverter_readings_recorded_at.sql
+# Apply all migrations (requires DATABASE_URL in local.env)
+conda activate solar_api_data
+python db/migrate.py
 ```
 
-Alternatively, for a fresh setup you can use the all-in-one script:
+Applied migrations are recorded in the `schema_migrations` table. Useful commands:
 
 ```bash
-psql -U postgres -f db/init.sql
+python db/migrate.py --status         # show applied / pending migrations
+python db/migrate.py                  # apply anything pending (e.g. after pulling a branch with a new migration)
+python db/migrate.py --baseline 006   # existing DB that predates tracking: mark 001-006 applied without running them
 ```
+
+To change the schema, add a new numbered file (e.g. `db/007_...sql`). Never edit a migration that has already been applied.
 
 ## 5. Download Gateway Certificate
 
